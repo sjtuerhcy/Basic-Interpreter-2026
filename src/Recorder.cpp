@@ -3,7 +3,7 @@
 
 #include<iostream>
 
-Recorder::~Recorder() {};
+Recorder::~Recorder() { clear(); };
 
 void Recorder::add(int line, Statement* stmt) {
   auto it = lines_.find(line);
