@@ -1,6 +1,6 @@
 // TODO: Imply interfaces declared in the Program.hpp.
 #include "Program.hpp"
-#include "Error.hpp"
+#include "utils/Error.hpp"
 
 #include<iostream>
 

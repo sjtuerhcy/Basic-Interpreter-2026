@@ -36,7 +36,7 @@ bool Recorder::hasLine(int line) const noexcept {
   return false;
 }
 
-void Recorder::clear() {
+void Recorder::clear() noexcept {
   lines_.clear();
 }
 
