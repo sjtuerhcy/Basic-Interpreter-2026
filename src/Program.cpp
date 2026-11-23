@@ -18,7 +18,7 @@ void Program::run() {
   programEnd_ = false;
   programCounter_ = recorder_.nextLine(0);
   try {
-    while (programCounter_ != -1 && programEnd_) {
+    while (programCounter_ != -1 && !programEnd_) {
       const int cur = programCounter_;
       programCounter_ = recorder_.nextLine(cur);
       const Statement* stmt = recorder_.get(cur);
