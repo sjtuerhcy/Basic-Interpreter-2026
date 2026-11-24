@@ -9,22 +9,18 @@
 #include "Statement.hpp"
 #include "utils/Error.hpp"
 
-ParsedLine::ParsedLine() { statement_ = nullptr; }
-
-ParsedLine::~ParsedLine() { delete statement_; }
-
 void ParsedLine::setLine(int line) { line_number_.emplace(line); }
 
 std::optional<int> ParsedLine::getLine() { return line_number_; }
 
-void ParsedLine::setStatement(Statement* stmt) { statement_ = stmt; }
+void ParsedLine::setStatement(std::unique_ptr<Statement> stmt) { 
+  statement_ = std::move(stmt); 
+}
 
-Statement* ParsedLine::getStatement() const { return statement_; }
+Statement* ParsedLine::getStatement() const { return statement_.get(); }
 
-Statement* ParsedLine::fetchStatement() {
-  Statement* temp = statement_;
-  statement_ = nullptr;
-  return temp;
+std::unique_ptr<Statement> ParsedLine::fetchStatement() {
+  return std::move(statement_);
 }
 
 ParsedLine Parser::parseLine(TokenStream& tokens,
@@ -50,7 +46,7 @@ ParsedLine Parser::parseLine(TokenStream& tokens,
   return result;
 }
 
-Statement* Parser::parseStatement(TokenStream& tokens,
+std::unique_ptr<Statement> Parser::parseStatement(TokenStream& tokens,
                                   const std::string& originLine) const {
   if (tokens.empty()) {
     throw BasicError("SYNTAX ERROR");
@@ -81,7 +77,7 @@ Statement* Parser::parseStatement(TokenStream& tokens,
   }
 }
 
-Statement* Parser::parseLet(TokenStream& tokens,
+std::unique_ptr<Statement> Parser::parseLet(TokenStream& tokens,
                             const std::string& originLine) const {
   if (tokens.empty()) {
     throw BasicError("SYNTAX ERROR");
@@ -101,17 +97,17 @@ Statement* Parser::parseLet(TokenStream& tokens,
   auto expr = parseExpression(tokens);
 
   // TODO: create a corresponding stmt and return it.
-  return new LetStatement(originLine, varName, std::move(expr));
+  return std::make_unique<LetStatement>(originLine, varName, std::move(expr));
 }
 
-Statement* Parser::parsePrint(TokenStream& tokens,
+std::unique_ptr<Statement> Parser::parsePrint(TokenStream& tokens,
                               const std::string& originLine) const {
   auto expr = parseExpression(tokens);
   // TODO: create a corresponding stmt and return it.
-  return new PrintStatement(originLine, std::move(expr));
+  return std::make_unique<PrintStatement>(originLine, std::move(expr));
 }
 
-Statement* Parser::parseInput(TokenStream& tokens,
+std::unique_ptr<Statement> Parser::parseInput(TokenStream& tokens,
                               const std::string& originLine) const {
   if (tokens.empty()) {
     throw BasicError("SYNTAX ERROR");
@@ -124,10 +120,10 @@ Statement* Parser::parseInput(TokenStream& tokens,
 
   std::string varName = varToken->text;
   // TODO: create a corresponding stmt and return it.
-  return new InputStatement(originLine, varName);
+  return std::make_unique<InputStatement>(originLine, varName);
 }
 
-Statement* Parser::parseGoto(TokenStream& tokens,
+std::unique_ptr<Statement> Parser::parseGoto(TokenStream& tokens,
                              const std::string& originLine) const {
   if (tokens.empty()) {
     throw BasicError("SYNTAX ERROR");
@@ -140,10 +136,10 @@ Statement* Parser::parseGoto(TokenStream& tokens,
 
   int targetLine = parseLiteral(lineToken);
   // TODO: create a corresponding stmt and return it.
-  return new GotoStatement(originLine, targetLine);
+  return std::make_unique<GotoStatement>(originLine, targetLine);
 }
 
-Statement* Parser::parseIf(TokenStream& tokens,
+std::unique_ptr<Statement> Parser::parseIf(TokenStream& tokens,
                            const std::string& originLine) const {
   // 解析左表达式
   auto leftExpr = parseExpression(tokens);
@@ -190,23 +186,23 @@ Statement* Parser::parseIf(TokenStream& tokens,
   int targetLine = parseLiteral(lineToken);
 
   // TODO: create a corresponding stmt and return it.
-  return new IfStatement(originLine, std::move(leftExpr), op, std::move(rightExpr), targetLine);
+  return std::make_unique<IfStatement>(originLine, std::move(leftExpr), op, std::move(rightExpr), targetLine);
 }
 
-Statement* Parser::parseRem(TokenStream& tokens,
+std::unique_ptr<Statement> Parser::parseRem(TokenStream& tokens,
                             const std::string& originLine) const {
   const Token* remInfo = tokens.get();
   if (!remInfo || remInfo->type != TokenType::REMINFO) {
     throw BasicError("SYNTAX ERROR");
   }
   // TODO: create a corresponding stmt and return it.
-  return new RemStatement(originLine);
+  return std::make_unique<RemStatement>(originLine);
 }
 
-Statement* Parser::parseEnd(TokenStream& tokens,
+std::unique_ptr<Statement> Parser::parseEnd(TokenStream& tokens,
                             const std::string& originLine) const {
   // TODO: create a corresponding stmt and return it.
-  return new EndStatement(originLine);
+  return std::make_unique<EndStatement>(originLine);
 }
 
 std::unique_ptr<Expression> Parser::parseExpression(TokenStream& tokens) const {

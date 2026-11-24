@@ -6,8 +6,8 @@
 
 Program::Program() : recorder_(), vars_(), programCounter_(0), programEnd_(false) {};
 
-void Program::addStmt(int line, Statement* stmt) {
-  recorder_.add(line, stmt);
+void Program::addStmt(int line, std::unique_ptr<Statement> stmt) {
+  recorder_.add(line, std::move(stmt));
 }
 
 void Program::removeStmt(int line) {
@@ -42,7 +42,7 @@ void Program::clear() {
   vars_.clear();
 }
 
-void Program::execute(Statement* stmt) {
+void Program::execute(std::unique_ptr<Statement> stmt) {
   if (stmt != nullptr) {
     stmt->execute(vars_, *this);
   }

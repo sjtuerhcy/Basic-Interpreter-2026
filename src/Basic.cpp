@@ -87,7 +87,7 @@ int main() {
         }
       }
       else {
-        program.execute(parsed.getStatement());
+        program.execute(parsed.fetchStatement());
       }
     } catch (const BasicError& e) {
       std::cout << e.message() << "\n";

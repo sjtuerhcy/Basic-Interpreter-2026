@@ -3,28 +3,18 @@
 
 #include<iostream>
 
-Recorder::~Recorder() { clear(); };
-
-void Recorder::add(int line, Statement* stmt) {
-  auto it = lines_.find(line);
-  if (it != lines_.end()) {
-    delete it->second;
-  }
-  lines_[line] = stmt;
+void Recorder::add(int line, std::unique_ptr<Statement> stmt) {
+  lines_[line] = std::move(stmt);
 }
 
 void Recorder::remove(int line) {
-  auto it = lines_.find(line);
-  if (it != lines_.end()) {
-    delete it->second;
-    lines_.erase(line);
-  }
+  lines_.erase(line);
 }
 
 const Statement* Recorder::get(int line) const noexcept {
   auto it = lines_.find(line);
   if (it != lines_.end()) {
-    return it->second;
+    return it->second.get();
   }
   return nullptr;
 }
@@ -38,9 +28,6 @@ bool Recorder::hasLine(int line) const noexcept {
 }
 
 void Recorder::clear() noexcept {
-  for (auto it = lines_.begin(); it != lines_.end(); it++) {
-    delete it->second;
-  }
   lines_.clear();
 }
 
