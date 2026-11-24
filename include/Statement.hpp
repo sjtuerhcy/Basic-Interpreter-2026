@@ -31,20 +31,18 @@ class RemStatement : public Statement {
 };
 class LetStatement : public Statement {
   public:
-    LetStatement(std::string source, std::string name, Expression* expression);
-    ~LetStatement() override;
+    LetStatement(std::string source, std::string name, std::unique_ptr<Expression> expression);
     void execute(VarState& state, Program& program) const override;
   private:
     std::string name_;
-    Expression* expression_;
+    std::unique_ptr<Expression> expression_;
 };
 class PrintStatement : public Statement {
   public:
-    PrintStatement(std::string source, Expression* expression);
-    ~PrintStatement() override;
+    PrintStatement(std::string source, std::unique_ptr<Expression> expression);
     void execute(VarState& state, Program& program) const override;
   private:
-    Expression* expression_;
+    std::unique_ptr<Expression> expression_;
 };
 class InputStatement : public Statement {
   public:
@@ -70,12 +68,11 @@ class GotoStatement : public Statement {
 };
 class IfStatement : public Statement {
   public:
-    IfStatement(std::string source, Expression* left, char op, Expression* right, int targetLine);
-    ~IfStatement() override;
+    IfStatement(std::string source, std::unique_ptr<Expression> left, char op, std::unique_ptr<Expression> right, int targetLine);
     void execute(VarState& state, Program& program) const override;
   private:
-    Expression* left_;
-    Expression* right_;
+    std::unique_ptr<Expression> left_;
+    std::unique_ptr<Expression> right_;
     char op_;
     int targetLine_;
 };

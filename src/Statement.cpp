@@ -18,16 +18,15 @@ const std::string& Statement::text() const noexcept { return source_; }
 RemStatement::RemStatement(std::string source) : Statement(std::move(source)) {}
 void RemStatement::execute(VarState&, Program&) const{}
 
-LetStatement::LetStatement(std::string source, std::string name, Expression* expression)
-    : Statement(std::move(source)), name_(std::move(name)), expression_(expression) {}
-LetStatement::~LetStatement() { delete expression_; }
+LetStatement::LetStatement(std::string source, std::string name, std::unique_ptr<Expression> expression)
+    : Statement(std::move(source)), name_(std::move(name)), expression_(std::move(expression)) {}
+
 void LetStatement::execute(VarState& state, Program&) const {
   state.setValue(name_, expression_->evaluate(state));
 }
 
-PrintStatement::PrintStatement(std::string source, Expression* expression)
-    : Statement(std::move(source)), expression_(expression) {}
-PrintStatement::~PrintStatement() { delete expression_; }
+PrintStatement::PrintStatement(std::string source, std::unique_ptr<Expression> expression)
+    : Statement(std::move(source)), expression_(std::move(expression)) {}
 void PrintStatement::execute(VarState& state, Program&) const{
   std::cout << expression_->evaluate(state) << '\n';
 }
@@ -88,12 +87,9 @@ void GotoStatement:: execute(VarState&, Program& program) const {
   program.changePC(targetLine_);
 }
 
-IfStatement::IfStatement(std::string source, Expression* left, char op, Expression* right, int targetLine)
-    : Statement(std::move(source)), left_(left), right_(right), op_(op), targetLine_(targetLine) {}
-IfStatement::~IfStatement() {
-  delete left_;
-  delete right_;
-}
+IfStatement::IfStatement(std::string source, std::unique_ptr<Expression> left, char op, std::unique_ptr<Expression> right, int targetLine)
+    : Statement(std::move(source)), left_(std::move(left)), right_(std::move(right)), op_(op), targetLine_(targetLine) {}
+
 void IfStatement::execute(VarState& state, Program& program) const {
   const int leftValue = left_->evaluate(state);
   const int rightValue = right_->evaluate(state);

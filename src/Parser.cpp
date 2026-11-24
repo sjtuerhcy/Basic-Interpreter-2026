@@ -101,14 +101,14 @@ Statement* Parser::parseLet(TokenStream& tokens,
   auto expr = parseExpression(tokens);
 
   // TODO: create a corresponding stmt and return it.
-  return new LetStatement(originLine, varName, expr);
+  return new LetStatement(originLine, varName, std::move(expr));
 }
 
 Statement* Parser::parsePrint(TokenStream& tokens,
                               const std::string& originLine) const {
   auto expr = parseExpression(tokens);
   // TODO: create a corresponding stmt and return it.
-  return new PrintStatement(originLine, expr);
+  return new PrintStatement(originLine, std::move(expr));
 }
 
 Statement* Parser::parseInput(TokenStream& tokens,
@@ -190,7 +190,7 @@ Statement* Parser::parseIf(TokenStream& tokens,
   int targetLine = parseLiteral(lineToken);
 
   // TODO: create a corresponding stmt and return it.
-  return new IfStatement(originLine, leftExpr, op, rightExpr, targetLine);
+  return new IfStatement(originLine, std::move(leftExpr), op, std::move(rightExpr), targetLine);
 }
 
 Statement* Parser::parseRem(TokenStream& tokens,
@@ -209,13 +209,13 @@ Statement* Parser::parseEnd(TokenStream& tokens,
   return new EndStatement(originLine);
 }
 
-Expression* Parser::parseExpression(TokenStream& tokens) const {
+std::unique_ptr<Expression> Parser::parseExpression(TokenStream& tokens) const {
   return parseExpression(tokens, 0);
 }
 
-Expression* Parser::parseExpression(TokenStream& tokens, int precedence) const {
+std::unique_ptr<Expression> Parser::parseExpression(TokenStream& tokens, int precedence) const {
   // 解析左操作数
-  Expression* left;
+  std::unique_ptr<Expression> left;
 
   if (tokens.empty()) {
     throw BasicError("SYNTAX ERROR");
@@ -228,9 +228,9 @@ Expression* Parser::parseExpression(TokenStream& tokens, int precedence) const {
 
   if (token->type == TokenType::NUMBER) {
     int value = parseLiteral(token);
-    left = new ConstExpression(value);
+    left = std::make_unique<ConstExpression>(value);
   } else if (token->type == TokenType::IDENTIFIER) {
-    left = new VariableExpression(token->text);
+    left = std::make_unique<VariableExpression>(token->text);
   } else if (token->type == TokenType::LEFT_PAREN) {
     ++leftParentCount;
     left = parseExpression(tokens, 0);
@@ -286,7 +286,7 @@ Expression* Parser::parseExpression(TokenStream& tokens, int precedence) const {
 
     // 解析右操作数，使用更高的优先级
     auto right = parseExpression(tokens, opPrecedence + 1);
-    left = new CompoundExpression(left, op, right);
+    left = std::make_unique<CompoundExpression>(std::move(left), op, std::move(right));
   }
 
   return left;
