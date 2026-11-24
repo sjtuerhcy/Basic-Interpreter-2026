@@ -44,6 +44,9 @@ void InputStatement::execute(VarState& state, Program&) const {
       line.pop_back();
     }
     std::size_t i = 0;
+    while ((line[i] == ' ' || line[i] == '\r') && i < line.size()) {
+        i++;
+    }
     bool negative = false;
     if (i < line.size() && (line[i] == '+' || line[i] == '-')) {
       negative = (line[i] == '-');
