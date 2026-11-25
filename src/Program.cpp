@@ -4,7 +4,7 @@
 
 #include<iostream>
 
-Program::Program() : recorder_(), vars_(), programCounter_(0), programEnd_(false) {};
+Program::Program() : recorder_(), scopes_(), programCounter_(0), programEnd_(false) {};
 
 void Program::addStmt(int line, std::unique_ptr<Statement> stmt) {
   recorder_.add(line, std::move(stmt));
@@ -25,7 +25,7 @@ void Program::run() {
       if (stmt == nullptr) {
         break;
       }
-      stmt->execute(vars_, *this);
+      stmt->execute(scopes_, *this);
     }
   } catch (const BasicError& e) {
     std::cout << e.message() << "\n";
@@ -39,12 +39,12 @@ void Program::list() const {
 
 void Program::clear() {
   recorder_.clear();
-  vars_.clear();
+  scopes_.clear();
 }
 
 void Program::execute(std::unique_ptr<Statement> stmt) {
   if (stmt != nullptr) {
-    stmt->execute(vars_, *this);
+    stmt->execute(scopes_, *this);
   }
 }
 
@@ -61,6 +61,14 @@ void Program::changePC(int line) {
 
 void Program::programEnd() {
   programEnd_ = true;
+}
+
+void Program::indent() {
+  scopes_.enterScope();
+}
+
+void Program::dedent() {
+  scopes_.leaveScope();
 }
 
 void Program::resetAfterRun() noexcept {

@@ -70,6 +70,12 @@ int main() {
         case TokenType::HELP:
           printHelp();
           continue;
+        case TokenType::INDENT:
+          program.indent();
+          continue;
+        case TokenType::DEDENT:
+          program.dedent();
+          continue;
         default:
           break;
       }

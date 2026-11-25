@@ -26,7 +26,6 @@ class Statement {
 class RemStatement : public Statement {
   public:
     explicit RemStatement(std::string source);
-    ~RemStatement() override = default;
     void execute(VarState& state, Program& program) const override;
 };
 class LetStatement : public Statement {
@@ -47,7 +46,6 @@ class PrintStatement : public Statement {
 class InputStatement : public Statement {
   public:
     InputStatement(std::string source, std::string name);
-    ~InputStatement() override = default;
     void execute(VarState& state, Program& program) const override;
   private:
     std::string name_;
@@ -55,13 +53,11 @@ class InputStatement : public Statement {
 class EndStatement : public Statement {
   public:
     explicit EndStatement(std::string source);
-    ~EndStatement() override = default;
     void execute(VarState& state, Program& program) const override;
 };
 class GotoStatement : public Statement {
   public:
     GotoStatement(std::string source, int targetLine);
-    ~GotoStatement() override = default;
     void execute(VarState& state, Program& program) const override;
   private:
     int targetLine_;
@@ -75,4 +71,16 @@ class IfStatement : public Statement {
     std::unique_ptr<Expression> right_;
     char op_;
     int targetLine_;
+};
+
+class IndentStatement : public Statement {
+  public:
+    IndentStatement(std::string source);
+    void execute(VarState& state, Program& program) const override;
+};
+
+class DedentStatement : public Statement {
+  public:
+    DedentStatement(std::string source);
+    void execute(VarState& state, Program& program) const override;
 };

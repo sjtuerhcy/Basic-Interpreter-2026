@@ -114,3 +114,15 @@ void IfStatement::execute(VarState& state, Program& program) const {
     program.changePC(targetLine_);
   }
 }
+
+IndentStatement::IndentStatement(std::string source) : Statement(std::move(source)) {}
+
+void IndentStatement::execute(VarState& state, Program& program) const {
+  state.enterScope();
+}
+
+DedentStatement::DedentStatement(std::string source) : Statement(std::move(source)) {}
+
+void DedentStatement::execute(VarState& state, Program& program) const {
+  state.leaveScope();
+}

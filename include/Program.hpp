@@ -24,9 +24,11 @@ class Program {
   void changePC(int line);
   void programEnd();
 
+  void indent();
+  void dedent();
  private:
   Recorder recorder_;
-  VarState vars_;
+  VarState scopes_;
   int programCounter_;
   bool programEnd_;
 
